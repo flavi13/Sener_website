@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GreenPitch · Sistema inteligente de gestión del césped deportivo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg:#0a1410;
+    --bg-2:#0f1d17;
+    --panel:#13251d;
+    --panel-2:#1a3328;
+    --line:#1f3b2f;
+    --grass:#2d8f4e;
+    --grass-2:#3eb164;
+    --grass-bright:#4ade80;
+    --grass-glow:rgba(74,222,128,0.25);
+    --text:#e8f5ee;
+    --text-dim:#9ab8a7;
+    --text-faint:#6a8577;
+    --accent:#fde047;
+    --warn:#f59e0b;
+    --danger:#ef4444;
+    --info:#38bdf8;
+    --r-sm:8px;
+    --r:14px;
+    --r-lg:20px;
+    --shadow: 0 10px 30px rgba(0,0,0,0.35);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased}
+  h1,h2,h3,h4{font-family:'Space Grotesk','Inter',sans-serif;letter-spacing:-0.01em;margin:0}
+  a{color:inherit;text-decoration:none}
+
+  /* === NAV === */
+  nav.top{
+    position:sticky;top:0;z-index:50;
+    backdrop-filter:saturate(160%) blur(14px);
+    background:rgba(10,20,16,0.7);
+    border-bottom:1px solid var(--line);
+  }
+  .nav-inner{max-width:1240px;margin:0 auto;padding:14px 28px;display:flex;align-items:center;justify-content:space-between}
+  .logo{display:flex;align-items:center;gap:10px;font-family:'Space Grotesk';font-weight:700;font-size:20px}
+  .logo-mark{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--grass-bright),var(--grass));display:grid;place-items:center;box-shadow:0 6px 18px var(--grass-glow)}
+  .logo-mark svg{width:20px;height:20px;color:#0a1410}
+  .nav-links{display:flex;gap:28px;font-size:14px;color:var(--text-dim)}
+  .nav-links a:hover{color:var(--grass-bright)}
+  .nav-cta{padding:9px 18px;border-radius:999px;background:var(--grass-bright);color:#0a1410;font-weight:600;font-size:14px;transition:transform .15s}
+  .nav-cta:hover{transform:translateY(-1px)}
+
+  /* === HERO === */
+  .hero{position:relative;overflow:hidden;padding:96px 28px 120px;text-align:center}
+  .hero::before{
+    content:"";position:absolute;inset:0;
+    background:
+      radial-gradient(800px 360px at 50% -10%, rgba(74,222,128,0.18), transparent 60%),
+      radial-gradient(600px 300px at 85% 20%, rgba(56,189,248,0.10), transparent 60%);
+    pointer-events:none;
+  }
+  .hero-inner{max-width:980px;margin:0 auto;position:relative}
+  .hero-badge{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:7px 14px;border-radius:999px;
+    background:rgba(74,222,128,0.10);border:1px solid rgba(74,222,128,0.25);
+    color:var(--grass-bright);font-size:13px;font-weight:500;margin-bottom:24px;
+  }
+  .hero-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--grass-bright);box-shadow:0 0 10px var(--grass-bright);animation:pulseDot 1.6s ease-in-out infinite}
+  .hero h1{font-size:clamp(36px,5.6vw,68px);line-height:1.05;font-weight:700;margin-bottom:24px}
+  .hero h1 .accent{background:linear-gradient(120deg,var(--grass-bright),#a7f3d0);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero p.lead{font-size:clamp(16px,1.4vw,19px);color:var(--text-dim);max-width:720px;margin:0 auto 36px}
+  .hero-ctas{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+  .btn{padding:13px 24px;border-radius:12px;font-weight:600;font-size:15px;border:none;cursor:pointer;transition:transform .15s,box-shadow .15s;display:inline-flex;align-items:center;gap:8px}
+  .btn-primary{background:var(--grass-bright);color:#0a1410;box-shadow:0 10px 30px var(--grass-glow)}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 14px 38px var(--grass-glow)}
+  .btn-ghost{background:transparent;color:var(--text);border:1px solid var(--line)}
+  .btn-ghost:hover{border-color:var(--grass-bright);color:var(--grass-bright)}
+
+  .hero-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;max-width:880px;margin:64px auto 0}
+  .stat{padding:18px;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);text-align:center}
+  .stat .num{font-family:'Space Grotesk';font-size:28px;font-weight:700;color:var(--grass-bright)}
+  .stat .lbl{font-size:12px;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.06em;margin-top:4px}
+
+  /* === SECTION === */
+  section{padding:90px 28px}
+  .section-inner{max-width:1240px;margin:0 auto}
+  .eyebrow{color:var(--grass-bright);font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:0.12em;margin-bottom:12px}
+  .section-title{font-size:clamp(28px,3.4vw,42px);font-weight:700;margin-bottom:14px;line-height:1.15}
+  .section-sub{color:var(--text-dim);max-width:680px;font-size:16px;margin-bottom:48px}
+
+  /* === FEATURES === */
+  .features{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  .feature{padding:28px;background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);transition:border-color .2s,transform .2s}
+  .feature:hover{border-color:var(--grass);transform:translateY(-3px)}
+  .feature .ic{width:46px;height:46px;border-radius:12px;background:linear-gradient(135deg,rgba(74,222,128,0.18),rgba(74,222,128,0.05));display:grid;place-items:center;color:var(--grass-bright);margin-bottom:18px}
+  .feature h3{font-size:18px;margin-bottom:8px}
+  .feature p{color:var(--text-dim);font-size:14.5px;margin:0}
+
+  /* === DASHBOARD === */
+  .dash-wrap{padding:80px 28px 110px;background:linear-gradient(180deg,transparent,rgba(74,222,128,0.04) 30%, transparent)}
+  .dash-frame{
+    max-width:1280px;margin:0 auto;
+    background:var(--bg-2);
+    border:1px solid var(--line);
+    border-radius:24px;
+    overflow:hidden;
+    box-shadow:var(--shadow);
+  }
+  .dash-header{display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid var(--line);background:var(--panel)}
+  .dash-title-block{display:flex;align-items:center;gap:14px}
+  .dash-title-block .lights{display:flex;gap:6px}
+  .dash-title-block .lights span{width:11px;height:11px;border-radius:50%}
+  .dash-title-block .lights span:nth-child(1){background:#ef4444}
+  .dash-title-block .lights span:nth-child(2){background:#f59e0b}
+  .dash-title-block .lights span:nth-child(3){background:var(--grass-bright)}
+  .dash-title-block h3{font-size:16px;color:var(--text-dim);font-weight:500}
+  .dash-time{font-size:13px;color:var(--text-faint);font-family:'Space Grotesk';display:flex;align-items:center;gap:8px}
+  .live-pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;background:rgba(74,222,128,0.12);color:var(--grass-bright);font-size:12px;font-weight:600}
+  .live-pill .pulse{width:7px;height:7px;border-radius:50%;background:var(--grass-bright);animation:pulseDot 1.4s infinite}
+
+  /* Tabs */
+  .tabs{display:flex;gap:4px;padding:14px 24px 0;border-bottom:1px solid var(--line);background:var(--panel);overflow-x:auto}
+  .tab{
+    padding:10px 18px;border-radius:10px 10px 0 0;font-size:14px;font-weight:500;
+    color:var(--text-dim);cursor:pointer;border:1px solid transparent;border-bottom:none;
+    transition:background .15s,color .15s;white-space:nowrap;display:flex;align-items:center;gap:8px;
+  }
+  .tab:hover{color:var(--text)}
+  .tab.active{background:var(--bg-2);color:var(--grass-bright);border-color:var(--line)}
+  .tab .tabdot{width:8px;height:8px;border-radius:50%}
+
+  .dash-body{display:grid;grid-template-columns:1.25fr 1fr;gap:0}
+  @media(max-width:1100px){.dash-body{grid-template-columns:1fr}}
+
+  .dash-left{padding:26px;border-right:1px solid var(--line)}
+  .dash-right{padding:26px;display:flex;flex-direction:column;gap:18px}
+
+  /* KPI cards */
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px}
+  .kpi{padding:14px;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);position:relative;overflow:hidden}
+  .kpi .kpi-lbl{font-size:11px;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.06em;display:flex;align-items:center;gap:6px}
+  .kpi .kpi-val{font-family:'Space Grotesk';font-size:24px;font-weight:700;margin-top:6px;display:flex;align-items:baseline;gap:4px}
+  .kpi .kpi-val .u{font-size:13px;color:var(--text-faint);font-weight:500}
+  .kpi .kpi-trend{font-size:11px;color:var(--text-faint);margin-top:4px;display:flex;align-items:center;gap:4px}
+  .kpi.warn .kpi-val{color:var(--warn)}
+  .kpi.ok .kpi-val{color:var(--grass-bright)}
+  .kpi.danger .kpi-val{color:var(--danger)}
+  .kpi.info .kpi-val{color:var(--info)}
+
+  /* Football pitch */
+  .pitch-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);padding:22px;margin-bottom:18px}
+  .pitch-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+  .pitch-head h4{font-size:15px;font-weight:600}
+  .pitch-legend{display:flex;gap:14px;font-size:11px;color:var(--text-dim)}
+  .pitch-legend span{display:inline-flex;align-items:center;gap:5px}
+  .pitch-legend i{width:9px;height:9px;border-radius:50%;display:inline-block}
+  .pitch-svg-wrap{position:relative;border-radius:14px;overflow:hidden;aspect-ratio:16/10;background:#0a1410}
+  .pitch-svg-wrap svg{width:100%;height:100%;display:block}
+
+  /* Sensor pulse */
+  .sensor-dot{transform-origin:center;transform-box:fill-box}
+  @keyframes sensorPulse{
+    0%{r:5;opacity:1}
+    50%{r:8;opacity:0.55}
+    100%{r:5;opacity:1}
+  }
+  .sensor-ring{transform-origin:center;transform-box:fill-box}
+  @keyframes ringExpand{
+    0%{r:6;opacity:0.55}
+    100%{r:24;opacity:0}
+  }
+
+  /* Water drop animation */
+  .raindrop{animation:fall 1.8s linear infinite;opacity:0}
+  @keyframes fall{
+    0%{transform:translateY(-12px);opacity:0}
+    20%{opacity:0.85}
+    100%{transform:translateY(40px);opacity:0}
+  }
+
+  /* Charts */
+  .chart-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);padding:22px}
+  .chart-card h4{font-size:14px;color:var(--text-dim);font-weight:500;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center}
+  .chart-card h4 .tag{font-size:11px;padding:3px 8px;border-radius:999px;background:rgba(74,222,128,0.12);color:var(--grass-bright)}
+  .chart-canvas-wrap{position:relative;height:180px}
+
+  /* Right side panels */
+  .panel-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);padding:20px}
+  .panel-card h4{font-size:14px;color:var(--text-dim);font-weight:500;margin-bottom:14px;text-transform:uppercase;letter-spacing:0.06em}
+  .reco-list{display:flex;flex-direction:column;gap:10px}
+  .reco{
+    display:flex;gap:12px;padding:12px;border-radius:12px;
+    background:rgba(74,222,128,0.05);border:1px solid rgba(74,222,128,0.15);
+    align-items:flex-start;
+  }
+  .reco.warn{background:rgba(245,158,11,0.06);border-color:rgba(245,158,11,0.22)}
+  .reco.danger{background:rgba(239,68,68,0.06);border-color:rgba(239,68,68,0.22)}
+  .reco-ic{width:32px;height:32px;border-radius:9px;background:rgba(74,222,128,0.18);color:var(--grass-bright);display:grid;place-items:center;flex-shrink:0}
+  .reco.warn .reco-ic{background:rgba(245,158,11,0.18);color:var(--warn)}
+  .reco.danger .reco-ic{background:rgba(239,68,68,0.18);color:var(--danger)}
+  .reco-text{font-size:13.5px}
+  .reco-text strong{display:block;margin-bottom:2px;font-size:13.5px}
+  .reco-text span{color:var(--text-dim);font-size:12.5px}
+  .reco-meta{font-size:11px;color:var(--text-faint);margin-top:4px}
+
+  .meteo-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+  .meteo-day{padding:10px;border-radius:10px;background:var(--bg-2);text-align:center;border:1px solid var(--line)}
+  .meteo-day .d{font-size:11px;color:var(--text-faint);text-transform:uppercase}
+  .meteo-day .ic{font-size:20px;margin:4px 0}
+  .meteo-day .t{font-size:13px;font-weight:600}
+  .meteo-day .r{font-size:10px;color:var(--info);margin-top:2px}
+
+  .events{display:flex;flex-direction:column;gap:10px}
+  .event{display:flex;align-items:center;gap:12px;padding:10px;border-radius:10px;background:var(--bg-2);border:1px solid var(--line)}
+  .event-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+  .event-info{flex:1}
+  .event-info .t{font-size:13px;font-weight:500}
+  .event-info .s{font-size:11px;color:var(--text-faint)}
+  .event-tag{font-size:10px;padding:3px 8px;border-radius:999px;background:rgba(74,222,128,0.12);color:var(--grass-bright);text-transform:uppercase;letter-spacing:0.05em}
+
+  /* CTA */
+  .cta-band{padding:80px 28px;text-align:center}
+  .cta-band .inner{max-width:780px;margin:0 auto;padding:48px;background:linear-gradient(135deg,var(--panel),var(--panel-2));border:1px solid var(--line);border-radius:24px}
+  .cta-band h2{font-size:34px;margin-bottom:14px}
+  .cta-band p{color:var(--text-dim);margin-bottom:24px}
+
+  /* Footer */
+  footer{padding:48px 28px;border-top:1px solid var(--line);color:var(--text-faint);font-size:13px}
+  .foot-inner{max-width:1240px;margin:0 auto;display:flex;justify-content:space-between;flex-wrap:wrap;gap:18px}
+
+  @keyframes pulseDot{
+    0%,100%{transform:scale(1);opacity:1}
+    50%{transform:scale(1.4);opacity:0.6}
+  }
+
+  @media(max-width:780px){
+    .features{grid-template-columns:1fr}
+    .kpis{grid-template-columns:repeat(2,1fr)}
+    .hero-stats{grid-template-columns:repeat(2,1fr)}
+    .nav-links{display:none}
+    .meteo-grid{grid-template-columns:repeat(2,1fr)}
+  }
+
+  /* Hide tab content */
+  .tab-content{display:none}
+  .tab-content.active{display:block}
+</style>
+</head>
+<body>
+
+<!-- ============ NAV ============ -->
+<nav class="top">
+  <div class="nav-inner">
+    <div class="logo">
+      <div class="logo-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C7 7 7 13 12 22"/><path d="M12 2c5 5 5 11 0 20"/><path d="M5 12h14"/></svg>
+      </div>
+      GreenPitch<span style="color:var(--grass-bright)">.AI</span>
+    </div>
+    <div class="nav-links">
+      <a href="#producto">Producto</a>
+      <a href="#caracteristicas">Características</a>
+      <a href="#dashboard">Dashboard</a>
+      <a href="#contacto">Contacto</a>
+    </div>
+    <a href="#dashboard" class="nav-cta">Ver demo</a>
+  </div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<section class="hero" id="producto">
+  <div class="hero-inner">
+    <span class="hero-badge"><span class="dot"></span> IoT · IA Predictiva · Tiempo real</span>
+    <h1>Sistema inteligente de gestión del <span class="accent">césped deportivo</span> mediante datos e IA</h1>
+    <p class="lead">GreenPitch integra sensores IoT, datos meteorológicos y la planificación de actividades del campo para mantener el césped en estado óptimo, reducir el consumo de agua hasta un 35% y bajar los costes operativos.</p>
+    <div class="hero-ctas">
+      <a href="#dashboard" class="btn btn-primary">
+        Ver dashboard en vivo
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+      <a href="#caracteristicas" class="btn btn-ghost">Cómo funciona</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><div class="num" data-target="35">0</div><div class="lbl">% menos agua</div></div>
+      <div class="stat"><div class="num" data-target="24">0</div><div class="lbl">Sensores / campo</div></div>
+      <div class="stat"><div class="num" data-target="98">0</div><div class="lbl">% precisión IA</div></div>
+      <div class="stat"><div class="num" data-target="42">0</div><div class="lbl">% ahorro coste</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FEATURES ============ -->
+<section id="caracteristicas">
+  <div class="section-inner">
+    <div class="eyebrow">Cómo funciona</div>
+    <h2 class="section-title">Del sensor al césped perfecto, sin intervención manual.</h2>
+    <p class="section-sub">Una plataforma SaaS que centraliza todos los datos del campo y los convierte en decisiones automáticas de riego, iluminación y mantenimiento.</p>
+    <div class="features">
+      <div class="feature">
+        <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L4 7v6c0 5 3.5 9 8 11 4.5-2 8-6 8-11V7l-8-5z"/><circle cx="12" cy="11" r="2.5"/></svg></div>
+        <h3>Sensores IoT distribuidos</h3>
+        <p>Sondas de humedad, temperatura, luz, pH y salinidad repartidas por zonas del campo, enviando lecturas cada minuto.</p>
+      </div>
+      <div class="feature">
+        <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/><circle cx="12" cy="12" r="4"/></svg></div>
+        <h3>Dashboard en tiempo real</h3>
+        <p>Visualiza KPIs de suelo, humedad, luz y estado del césped por zonas con datos refrescándose en directo.</p>
+      </div>
+      <div class="feature">
+        <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v6M12 22v-6M2 12h6M22 12h-6"/><path d="M9 9l6 6M15 9l-6 6"/><circle cx="12" cy="12" r="3"/></svg></div>
+        <h3>IA predictiva</h3>
+        <p>Cruza lecturas, previsión meteo y calendario de partidos para anticipar riegos, podas e iluminación.</p>
+      </div>
+      <div class="feature">
+        <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12c2 0 3-2 5-2s2 4 4 4 2-4 4-4 3 2 5 2"/><path d="M3 18c2 0 3-2 5-2s2 4 4 4 2-4 4-4 3 2 5 2"/></svg></div>
+        <h3>Riego inteligente por zonas</h3>
+        <p>El sistema decide qué zona regar y cuánto, evitando excesos y zonas secas que afectan al juego.</p>
+      </div>
+      <div class="feature">
+        <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18l6-6 4 4 8-8"/><path d="M14 8h7v7"/></svg></div>
+        <h3>Reducción de costes</h3>
+        <p>Histórico completo de agua, luz y mantenimiento para auditar el ahorro real mes a mes.</p>
+      </div>
+      <div class="feature">
+        <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+        <h3>Alertas en tiempo real</h3>
+        <p>Avisos automáticos por umbral, fallo de sensor o batería baja vía email, app y notificación push.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ DASHBOARD ============ -->
+<section class="dash-wrap" id="dashboard">
+  <div class="section-inner">
+    <div class="eyebrow">Dashboard en vivo</div>
+    <h2 class="section-title">Cada campo, bajo control. Cada zona, monitorizada.</h2>
+    <p class="section-sub">Cambia entre los campos para ver cómo se comporta cada uno en tiempo real. Los sensores pulsan en su ubicación y los datos se actualizan cada 3 segundos.</p>
+  </div>
+
+  <div class="dash-frame">
+    <div class="dash-header">
+      <div class="dash-title-block">
+        <div class="lights"><span></span><span></span><span></span></div>
+        <h3>greenpitch.app · Panel de control</h3>
+      </div>
+      <div class="dash-time">
+        <span class="live-pill"><span class="pulse"></span> EN VIVO</span>
+        <span id="liveClock">--:--:--</span>
+      </div>
+    </div>
+
+    <div class="tabs" id="tabs">
+      <div class="tab active" data-tab="campo1"><span class="tabdot" style="background:var(--grass-bright)"></span>Estadio Norte</div>
+      <div class="tab" data-tab="campo2"><span class="tabdot" style="background:#f59e0b"></span>Entrenamiento A</div>
+      <div class="tab" data-tab="campo3"><span class="tabdot" style="background:#38bdf8"></span>Entrenamiento B</div>
+      <div class="tab" data-tab="campo4"><span class="tabdot" style="background:#a78bfa"></span>Cantera Sur</div>
+    </div>
+
+    <!-- TAB CONTENTS GENERATED BY JS BELOW (single template, data swaps) -->
+    <div id="tabContent" class="tab-content active">
+      <div class="dash-body">
+        <div class="dash-left">
+          <div class="kpis">
+            <div class="kpi ok">
+              <div class="kpi-lbl">💧 Humedad suelo</div>
+              <div class="kpi-val" id="kpi-humedad">—<span class="u">%</span></div>
+              <div class="kpi-trend" id="trend-humedad">—</div>
+            </div>
+            <div class="kpi info">
+              <div class="kpi-lbl">🌡️ Temperatura</div>
+              <div class="kpi-val" id="kpi-temp">—<span class="u">°C</span></div>
+              <div class="kpi-trend" id="trend-temp">—</div>
+            </div>
+            <div class="kpi warn">
+              <div class="kpi-lbl">☀️ Luz</div>
+              <div class="kpi-val" id="kpi-luz">—<span class="u">klx</span></div>
+              <div class="kpi-trend" id="trend-luz">—</div>
+            </div>
+            <div class="kpi ok">
+              <div class="kpi-lbl">🌱 Salud césped</div>
+              <div class="kpi-val" id="kpi-salud">—<span class="u">/100</span></div>
+              <div class="kpi-trend" id="trend-salud">—</div>
+            </div>
+          </div>
+
+          <div class="pitch-card">
+            <div class="pitch-head">
+              <h4 id="pitch-title">Mapa de zonas — Estadio Norte</h4>
+              <div class="pitch-legend">
+                <span><i style="background:#4ade80"></i>Óptimo</span>
+                <span><i style="background:#fde047"></i>Atención</span>
+                <span><i style="background:#ef4444"></i>Crítico</span>
+              </div>
+            </div>
+            <div class="pitch-svg-wrap" id="pitchSvgWrap"></div>
+          </div>
+
+          <div class="chart-card">
+            <h4>Humedad del suelo · últimas 12 h <span class="tag">Tiempo real</span></h4>
+            <div class="chart-canvas-wrap"><canvas id="chartHumedad"></canvas></div>
+          </div>
+        </div>
+
+        <div class="dash-right">
+          <div class="panel-card">
+            <h4>🤖 Recomendaciones IA</h4>
+            <div class="reco-list" id="recoList"></div>
+          </div>
+
+          <div class="panel-card">
+            <h4>🌦️ Previsión meteorológica</h4>
+            <div class="meteo-grid" id="meteoGrid"></div>
+          </div>
+
+          <div class="panel-card">
+            <h4>📅 Próximas actividades</h4>
+            <div class="events" id="eventsList"></div>
+          </div>
+
+          <div class="chart-card">
+            <h4>Temperatura del suelo · 24h <span class="tag">°C</span></h4>
+            <div class="chart-canvas-wrap" style="height:140px"><canvas id="chartTemp"></canvas></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CTA ============ -->
+<section class="cta-band" id="contacto">
+  <div class="inner">
+    <h2>¿Listo para cuidar tu césped con datos?</h2>
+    <p>Solicita una demo personalizada y descubre cómo GreenPitch puede transformar el mantenimiento de tu instalación.</p>
+    <a href="mailto:hola@greenpitch.ai" class="btn btn-primary">Solicitar demo</a>
+  </div>
+</section>
+
+<footer>
+  <div class="foot-inner">
+    <div>© 2026 GreenPitch.AI · Sistema inteligente de gestión del césped deportivo</div>
+    <div>hola@greenpitch.ai · +34 900 000 000</div>
+  </div>
+</footer>
+
+<!-- ============ DATA + LOGIC ============ -->
+<script>
+/* ====== DATOS POR CAMPO ====== */
+const CAMPOS = {
+  campo1: {
+    nombre: "Estadio Norte",
+    base: { humedad: 62, temp: 19, luz: 45, salud: 92 },
+    color: "#4ade80",
+    zonas: [
+      // x,y son % del rectángulo del campo, status: ok|warn|danger
+      { x:50, y:50, label:"Centro", status:"ok", value:64 },
+      { x:18, y:30, label:"Banda izq.", status:"ok", value:60 },
+      { x:18, y:70, label:"Banda izq. inf.", status:"warn", value:48 },
+      { x:82, y:30, label:"Banda der.", status:"ok", value:62 },
+      { x:82, y:70, label:"Banda der. inf.", status:"ok", value:65 },
+      { x:8,  y:50, label:"Área 1", status:"ok", value:68 },
+      { x:92, y:50, label:"Área 2", status:"warn", value:51 },
+      { x:35, y:50, label:"Pre-área izq.", status:"ok", value:63 },
+      { x:65, y:50, label:"Pre-área der.", status:"ok", value:60 },
+    ],
+    reco: [
+      { type:"ok", icon:"💧", title:"Riego programado zona Banda izq. inf.", desc:"6 mm a las 22:30 — la IA detecta caída prevista de humedad al 38% por temperatura y partido del sábado.", meta:"Confianza 94% · Modelo v2.3" },
+      { type:"warn", icon:"⚠️", title:"Atención zona Área 2", desc:"Humedad 51%, tendencia descendente. Recomendado riego suplementario en 4 horas.", meta:"Prioridad media" },
+      { type:"ok", icon:"🌱", title:"Estado general óptimo", desc:"92/100 — ningún corte ni fertilización requerida en las próximas 48h.", meta:"Última lectura hace 12 s" },
+    ],
+    meteo: [
+      { d:"HOY", ic:"☀️", t:"22°", r:"0 mm" },
+      { d:"VIE", ic:"⛅", t:"19°", r:"2 mm" },
+      { d:"SÁB", ic:"🌧️", t:"16°", r:"8 mm" },
+      { d:"DOM", ic:"☀️", t:"21°", r:"0 mm" },
+    ],
+    events: [
+      { t:"Partido — La Liga J34", s:"Sábado · 18:30 · 30.000 espectadores", color:"#ef4444", tag:"PARTIDO" },
+      { t:"Entrenamiento 1er equipo", s:"Mañana · 10:00 — 12:00", color:"#4ade80", tag:"ENTREN." },
+      { t:"Mantenimiento corte+riego", s:"Domingo · 08:00", color:"#38bdf8", tag:"MANT." },
+    ]
+  },
+  campo2: {
+    nombre: "Entrenamiento A",
+    base: { humedad: 54, temp: 21, luz: 52, salud: 84 },
+    color: "#f59e0b",
+    zonas: [
+      { x:50, y:50, label:"Centro", status:"ok", value:58 },
+      { x:18, y:30, label:"Banda izq.", status:"warn", value:46 },
+      { x:18, y:70, label:"Banda izq. inf.", status:"warn", value:44 },
+      { x:82, y:30, label:"Banda der.", status:"ok", value:55 },
+      { x:82, y:70, label:"Banda der. inf.", status:"ok", value:52 },
+      { x:8,  y:50, label:"Área 1", status:"danger", value:32 },
+      { x:92, y:50, label:"Área 2", status:"ok", value:60 },
+      { x:35, y:50, label:"Pre-área izq.", status:"warn", value:48 },
+      { x:65, y:50, label:"Pre-área der.", status:"ok", value:56 },
+    ],
+    reco: [
+      { type:"danger", icon:"🚨", title:"Zona Área 1 en estado crítico", desc:"Humedad 32%. Riego inmediato requerido — 12 mm en próximos 30 minutos.", meta:"Acción urgente" },
+      { type:"warn", icon:"💧", title:"Riego adicional bandas izquierdas", desc:"Programado a las 21:00 — 5 mm uniformes para recuperar nivel objetivo.", meta:"Confianza 88%" },
+      { type:"ok", icon:"✂️", title:"Corte programado", desc:"Altura actual 38mm — corte a 28mm previsto para mañana 07:00.", meta:"Modelo v2.3" },
+    ],
+    meteo: [
+      { d:"HOY", ic:"☀️", t:"24°", r:"0 mm" },
+      { d:"VIE", ic:"☀️", t:"23°", r:"0 mm" },
+      { d:"SÁB", ic:"⛅", t:"20°", r:"1 mm" },
+      { d:"DOM", ic:"🌧️", t:"17°", r:"6 mm" },
+    ],
+    events: [
+      { t:"Entrenamiento juvenil A", s:"Hoy · 17:00 — 19:00", color:"#4ade80", tag:"ENTREN." },
+      { t:"Entrenamiento juvenil B", s:"Mañana · 16:30", color:"#4ade80", tag:"ENTREN." },
+    ]
+  },
+  campo3: {
+    nombre: "Entrenamiento B",
+    base: { humedad: 71, temp: 17, luz: 38, salud: 89 },
+    color: "#38bdf8",
+    zonas: [
+      { x:50, y:50, label:"Centro", status:"ok", value:72 },
+      { x:18, y:30, label:"Banda izq.", status:"ok", value:69 },
+      { x:18, y:70, label:"Banda izq. inf.", status:"ok", value:73 },
+      { x:82, y:30, label:"Banda der.", status:"ok", value:75 },
+      { x:82, y:70, label:"Banda der. inf.", status:"ok", value:70 },
+      { x:8,  y:50, label:"Área 1", status:"ok", value:68 },
+      { x:92, y:50, label:"Área 2", status:"ok", value:72 },
+      { x:35, y:50, label:"Pre-área izq.", status:"ok", value:71 },
+      { x:65, y:50, label:"Pre-área der.", status:"ok", value:74 },
+    ],
+    reco: [
+      { type:"ok", icon:"✅", title:"Sin acciones requeridas", desc:"Todas las zonas dentro del rango óptimo. Sin riego programado en las próximas 8h.", meta:"Última revisión 2 min" },
+      { type:"warn", icon:"🌧️", title:"Lluvia prevista — pausar riego", desc:"6 mm previstos en 36h. La IA suspende el riego nocturno para evitar saturación.", meta:"Predicción meteo 91%" },
+      { type:"ok", icon:"💡", title:"Iluminación reducida", desc:"Disminuir 20% potencia de luz artificial entre 19:00–21:00 — ahorro estimado 8 €/día.", meta:"Optimización energía" },
+    ],
+    meteo: [
+      { d:"HOY", ic:"⛅", t:"18°", r:"1 mm" },
+      { d:"VIE", ic:"🌧️", t:"15°", r:"6 mm" },
+      { d:"SÁB", ic:"🌧️", t:"14°", r:"4 mm" },
+      { d:"DOM", ic:"⛅", t:"17°", r:"0 mm" },
+    ],
+    events: [
+      { t:"Entrenamiento femenino", s:"Hoy · 18:30", color:"#4ade80", tag:"ENTREN." },
+      { t:"Sesión preparador físico", s:"Sábado · 10:00", color:"#a78bfa", tag:"SESIÓN" },
+    ]
+  },
+  campo4: {
+    nombre: "Cantera Sur",
+    base: { humedad: 47, temp: 23, luz: 58, salud: 76 },
+    color: "#a78bfa",
+    zonas: [
+      { x:50, y:50, label:"Centro", status:"warn", value:48 },
+      { x:18, y:30, label:"Banda izq.", status:"warn", value:44 },
+      { x:18, y:70, label:"Banda izq. inf.", status:"warn", value:46 },
+      { x:82, y:30, label:"Banda der.", status:"danger", value:35 },
+      { x:82, y:70, label:"Banda der. inf.", status:"warn", value:42 },
+      { x:8,  y:50, label:"Área 1", status:"ok", value:55 },
+      { x:92, y:50, label:"Área 2", status:"danger", value:30 },
+      { x:35, y:50, label:"Pre-área izq.", status:"warn", value:50 },
+      { x:65, y:50, label:"Pre-área der.", status:"warn", value:47 },
+    ],
+    reco: [
+      { type:"danger", icon:"🚨", title:"Banda derecha en zona crítica", desc:"Dos sensores reportan humedad <36%. Riego inmediato programado — 14 mm dirigidos.", meta:"Prioridad alta" },
+      { type:"warn", icon:"🌱", title:"Fertilización recomendada", desc:"Salud 76/100. Aplicar nitrógeno en próximas 72h para recuperar densidad.", meta:"Modelo agronómico v1.8" },
+      { type:"ok", icon:"📅", title:"Sin partidos próximos", desc:"Ventana ideal para mantenimiento intensivo — corte, aireación y resiembra puntual.", meta:"Plan automático" },
+    ],
+    meteo: [
+      { d:"HOY", ic:"☀️", t:"26°", r:"0 mm" },
+      { d:"VIE", ic:"☀️", t:"25°", r:"0 mm" },
+      { d:"SÁB", ic:"☀️", t:"24°", r:"0 mm" },
+      { d:"DOM", ic:"⛅", t:"22°", r:"1 mm" },
+    ],
+    events: [
+      { t:"Mantenimiento integral", s:"Mañana · 06:00 — 14:00", color:"#38bdf8", tag:"MANT." },
+      { t:"Resiembra zona derecha", s:"Lunes · 08:00", color:"#a78bfa", tag:"AGRO" },
+    ]
+  }
+};
+
+/* ====== UTIL: COLOR POR STATUS ====== */
+const STATUS_COLOR = { ok:"#4ade80", warn:"#fde047", danger:"#ef4444" };
+
+/* ====== SVG DEL CAMPO ====== */
+function buildPitchSVG(zonas){
+  // Field aspect ratio 16:10 (105x65 approx)
+  const W = 1000, H = 625;
+  const PAD = 30;
+  const x0 = PAD, y0 = PAD, x1 = W-PAD, y1 = H-PAD;
+  const cx = W/2, cy = H/2;
+  // Penalty area dims
+  const paW = 180, paH = 320;
+  const gaW = 70, gaH = 180;
+  const goalW = 16, goalH = 90;
+
+  // Stripes (alternating darker/lighter)
+  const stripeCount = 12;
+  const stripeW = (x1-x0)/stripeCount;
+  let stripes = "";
+  for(let i=0;i<stripeCount;i++){
+    const fill = i%2===0 ? "#1f6b34" : "#1a5e2d";
+    stripes += `<rect x="${x0+i*stripeW}" y="${y0}" width="${stripeW}" height="${y1-y0}" fill="${fill}"/>`;
+  }
+
+  // Zonas: dot + ring + label
+  let dots = "";
+  zonas.forEach((z,i) => {
+    const px = x0 + (z.x/100)*(x1-x0);
+    const py = y0 + (z.y/100)*(y1-y0);
+    const c = STATUS_COLOR[z.status];
+    const delay = (i*0.18).toFixed(2);
+    dots += `
+      <g>
+        <circle cx="${px}" cy="${py}" r="22" fill="${c}" opacity="0.18">
+          <animate attributeName="r" values="18;30;18" dur="2.4s" begin="${delay}s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.10;0.30;0.10" dur="2.4s" begin="${delay}s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="${px}" cy="${py}" r="7" fill="${c}" stroke="#0a1410" stroke-width="2">
+          <animate attributeName="r" values="6;9;6" dur="1.8s" begin="${delay}s" repeatCount="indefinite"/>
+        </circle>
+        <text x="${px}" y="${py-18}" text-anchor="middle" font-family="Space Grotesk,sans-serif" font-size="14" font-weight="600" fill="#fff" style="text-shadow:0 1px 2px rgba(0,0,0,0.6)">${z.value}%</text>
+      </g>`;
+  });
+
+  // Raindrops (only over warn/danger zones to suggest active watering)
+  let rain = "";
+  zonas.forEach((z,i) => {
+    if(z.status === "warn" || z.status === "danger"){
+      const px = x0 + (z.x/100)*(x1-x0);
+      const py = y0 + (z.y/100)*(y1-y0);
+      for(let k=0;k<4;k++){
+        const offX = px + (Math.random()*40-20);
+        const startY = py - 60;
+        const dur = (1.4 + Math.random()*0.6).toFixed(2);
+        const delay = (Math.random()*1.5).toFixed(2);
+        rain += `<circle cx="${offX}" cy="${startY}" r="2.4" fill="#7dd3fc" opacity="0">
+          <animate attributeName="cy" from="${startY}" to="${py}" dur="${dur}s" begin="${delay}s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0;1;1;0" dur="${dur}s" begin="${delay}s" repeatCount="indefinite"/>
+        </circle>`;
+      }
+    }
+  });
+
+  return `
+  <svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+    <defs>
+      <linearGradient id="fieldGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#0f2c1a"/>
+        <stop offset="100%" stop-color="#0a1f12"/>
+      </linearGradient>
+    </defs>
+    <rect width="${W}" height="${H}" fill="url(#fieldGrad)"/>
+    ${stripes}
+    <!-- borde -->
+    <rect x="${x0}" y="${y0}" width="${x1-x0}" height="${y1-y0}" fill="none" stroke="#fff" stroke-width="3" stroke-opacity="0.85"/>
+    <!-- línea media -->
+    <line x1="${cx}" y1="${y0}" x2="${cx}" y2="${y1}" stroke="#fff" stroke-width="3" stroke-opacity="0.85"/>
+    <!-- círculo central -->
+    <circle cx="${cx}" cy="${cy}" r="80" fill="none" stroke="#fff" stroke-width="3" stroke-opacity="0.85"/>
+    <circle cx="${cx}" cy="${cy}" r="4" fill="#fff" fill-opacity="0.9"/>
+    <!-- áreas grandes -->
+    <rect x="${x0}" y="${cy-paH/2}" width="${paW}" height="${paH}" fill="none" stroke="#fff" stroke-width="3" stroke-opacity="0.85"/>
+    <rect x="${x1-paW}" y="${cy-paH/2}" width="${paW}" height="${paH}" fill="none" stroke="#fff" stroke-width="3" stroke-opacity="0.85"/>
+    <!-- áreas pequeñas -->
+    <rect x="${x0}" y="${cy-gaH/2}" width="${gaW}" height="${gaH}" fill="none" stroke="#fff" stroke-width="3" stroke-opacity="0.85"/>
+    <rect x="${x1-gaW}" y="${cy-gaH/2}" width="${gaW}" height="${gaH}" fill="none" stroke="#fff" stroke-width="3" stroke-opacity="0.85"/>
+    <!-- punto penalti -->
+    <circle cx="${x0+120}" cy="${cy}" r="3" fill="#fff" fill-opacity="0.9"/>
+    <circle cx="${x1-120}" cy="${cy}" r="3" fill="#fff" fill-opacity="0.9"/>
+    <!-- porterías -->
+    <rect x="${x0-goalW}" y="${cy-goalH/2}" width="${goalW}" height="${goalH}" fill="none" stroke="#fff" stroke-width="3" stroke-opacity="0.85"/>
+    <rect x="${x1}" y="${cy-goalH/2}" width="${goalW}" height="${goalH}" fill="none" stroke="#fff" stroke-width="3" stroke-opacity="0.85"/>
+    ${rain}
+    ${dots}
+  </svg>`;
+}
+
+/* ====== CHARTS ====== */
+let chartHumedad, chartTemp;
+function genSeries(base, n=24, amp=8){
+  const arr=[];
+  let v = base;
+  for(let i=0;i<n;i++){
+    v = base + Math.sin(i/3)*amp + (Math.random()*4-2);
+    arr.push(Number(v.toFixed(1)));
+  }
+  return arr;
+}
+
+function initCharts(){
+  const labels12 = Array.from({length:24},(_,i)=> (i%2===0?`${i/2}h`:""));
+  const ctx1 = document.getElementById('chartHumedad').getContext('2d');
+  chartHumedad = new Chart(ctx1, {
+    type:'line',
+    data:{ labels:labels12, datasets:[
+      { label:'Humedad (%)', data:[], borderColor:'#4ade80', backgroundColor:'rgba(74,222,128,0.15)', borderWidth:2, tension:0.4, fill:true, pointRadius:0 },
+      { label:'Objetivo', data:Array(24).fill(60), borderColor:'rgba(255,255,255,0.25)', borderDash:[4,4], borderWidth:1.5, pointRadius:0 }
+    ]},
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false} },
+      scales:{
+        x:{ ticks:{color:'#6a8577',font:{size:10}}, grid:{color:'rgba(255,255,255,0.04)'} },
+        y:{ min:30, max:90, ticks:{color:'#6a8577',font:{size:10}}, grid:{color:'rgba(255,255,255,0.06)'} }
+      }
+    }
+  });
+
+  const ctx2 = document.getElementById('chartTemp').getContext('2d');
+  chartTemp = new Chart(ctx2, {
+    type:'bar',
+    data:{ labels:labels12, datasets:[
+      { label:'°C', data:[], backgroundColor:'rgba(56,189,248,0.55)', borderColor:'#38bdf8', borderWidth:1, borderRadius:3 }
+    ]},
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false} },
+      scales:{
+        x:{ ticks:{color:'#6a8577',font:{size:10}}, grid:{display:false} },
+        y:{ ticks:{color:'#6a8577',font:{size:10}}, grid:{color:'rgba(255,255,255,0.06)'} }
+      }
+    }
+  });
+}
+
+/* ====== RENDER TAB ====== */
+let currentTab = "campo1";
+function renderTab(key){
+  currentTab = key;
+  const c = CAMPOS[key];
+
+  // KPIs
+  document.getElementById('kpi-humedad').innerHTML = `${c.base.humedad}<span class="u">%</span>`;
+  document.getElementById('kpi-temp').innerHTML = `${c.base.temp}<span class="u">°C</span>`;
+  document.getElementById('kpi-luz').innerHTML = `${c.base.luz}<span class="u">klx</span>`;
+  document.getElementById('kpi-salud').innerHTML = `${c.base.salud}<span class="u">/100</span>`;
+
+  document.getElementById('trend-humedad').innerHTML = trendArrow(0.6);
+  document.getElementById('trend-temp').innerHTML = trendArrow(-0.3);
+  document.getElementById('trend-luz').innerHTML = trendArrow(2.1);
+  document.getElementById('trend-salud').innerHTML = trendArrow(0.2);
+
+  // Pitch
+  document.getElementById('pitch-title').textContent = `Mapa de zonas — ${c.nombre}`;
+  document.getElementById('pitchSvgWrap').innerHTML = buildPitchSVG(c.zonas);
+
+  // Reco
+  document.getElementById('recoList').innerHTML = c.reco.map(r => `
+    <div class="reco ${r.type==='ok'?'':r.type}">
+      <div class="reco-ic">${r.icon}</div>
+      <div class="reco-text">
+        <strong>${r.title}</strong>
+        <span>${r.desc}</span>
+        <div class="reco-meta">${r.meta}</div>
+      </div>
+    </div>`).join("");
+
+  // Meteo
+  document.getElementById('meteoGrid').innerHTML = c.meteo.map(m => `
+    <div class="meteo-day">
+      <div class="d">${m.d}</div>
+      <div class="ic">${m.ic}</div>
+      <div class="t">${m.t}</div>
+      <div class="r">${m.r}</div>
+    </div>`).join("");
+
+  // Events
+  document.getElementById('eventsList').innerHTML = c.events.map(e => `
+    <div class="event">
+      <div class="event-dot" style="background:${e.color}"></div>
+      <div class="event-info">
+        <div class="t">${e.t}</div>
+        <div class="s">${e.s}</div>
+      </div>
+      <span class="event-tag" style="background:${e.color}22;color:${e.color}">${e.tag}</span>
+    </div>`).join("");
+
+  // Charts
+  chartHumedad.data.datasets[0].data = genSeries(c.base.humedad, 24, 8);
+  chartHumedad.update('none');
+  chartTemp.data.datasets[0].data = genSeries(c.base.temp, 24, 4);
+  chartTemp.update('none');
+}
+
+function trendArrow(delta){
+  const up = delta > 0;
+  const color = Math.abs(delta) < 0.2 ? "#9ab8a7" : (up ? "#4ade80" : "#38bdf8");
+  const arrow = up ? "↑" : "↓";
+  return `<span style="color:${color}">${arrow} ${Math.abs(delta).toFixed(1)}% / h</span>`;
+}
+
+/* ====== TABS ====== */
+document.querySelectorAll('#tabs .tab').forEach(t => {
+  t.addEventListener('click', ()=>{
+    document.querySelectorAll('#tabs .tab').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    renderTab(t.dataset.tab);
+  });
+});
+
+/* ====== LIVE UPDATES ====== */
+function tickLive(){
+  const c = CAMPOS[currentTab];
+  // jitter pequeños valores
+  c.base.humedad = Math.max(20, Math.min(95, c.base.humedad + (Math.random()*1.4-0.7)));
+  c.base.temp    = Math.max(5,  Math.min(40, c.base.temp    + (Math.random()*0.4-0.2)));
+  c.base.luz     = Math.max(0,  Math.min(120, c.base.luz    + (Math.random()*2-1)));
+  c.base.salud   = Math.max(60, Math.min(100, c.base.salud  + (Math.random()*0.6-0.3)));
+
+  document.getElementById('kpi-humedad').innerHTML = `${c.base.humedad.toFixed(1)}<span class="u">%</span>`;
+  document.getElementById('kpi-temp').innerHTML    = `${c.base.temp.toFixed(1)}<span class="u">°C</span>`;
+  document.getElementById('kpi-luz').innerHTML     = `${c.base.luz.toFixed(0)}<span class="u">klx</span>`;
+  document.getElementById('kpi-salud').innerHTML   = `${c.base.salud.toFixed(0)}<span class="u">/100</span>`;
+
+  // shift chart
+  const arr = chartHumedad.data.datasets[0].data;
+  arr.shift(); arr.push(Number(c.base.humedad.toFixed(1)));
+  chartHumedad.update('none');
+
+  const arr2 = chartTemp.data.datasets[0].data;
+  arr2.shift(); arr2.push(Number(c.base.temp.toFixed(1)));
+  chartTemp.update('none');
+}
+
+/* ====== CLOCK ====== */
+function tickClock(){
+  const d = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  document.getElementById('liveClock').textContent = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
+
+/* ====== HERO COUNTERS ====== */
+function animateCounters(){
+  document.querySelectorAll('.stat .num').forEach(el => {
+    const target = parseInt(el.dataset.target,10);
+    let v = 0;
+    const step = Math.max(1, Math.round(target/40));
+    const t = setInterval(()=>{
+      v += step;
+      if(v >= target){ v = target; clearInterval(t); }
+      el.textContent = v + (el.dataset.target==="35"||el.dataset.target==="98"||el.dataset.target==="42" ? "%" : "");
+    }, 30);
+  });
+}
+
+/* ====== INIT ====== */
+window.addEventListener('DOMContentLoaded', ()=>{
+  initCharts();
+  renderTab('campo1');
+  tickClock();
+  setInterval(tickClock, 1000);
+  setInterval(tickLive, 3000);
+
+  // Trigger counters when hero in view
+  const obs = new IntersectionObserver((entries)=>{
+    entries.forEach(e => {
+      if(e.isIntersecting){ animateCounters(); obs.disconnect(); }
+    });
+  });
+  obs.observe(document.querySelector('.hero-stats'));
+});
+</script>
+</body>
+</html>
