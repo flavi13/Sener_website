@@ -39,15 +39,6 @@ El mantenimiento de un campo de fútbol profesional supone **decenas de miles de
 
 Clubes profesionales, instalaciones municipales, ciudades deportivas, canteras y empresas de mantenimiento de césped deportivo que quieren dejar de gestionar sus campos por intuición y empezar a hacerlo con datos.
 
-## 🚀 Demo
-
-La carpeta `web/` contiene la landing y el dashboard interactivo. Para verla en local basta con abrir `index.html` en el navegador, o publicarla en GitHub Pages para tener una URL pública en menos de dos minutos.
-
-```bash
-# Servir en local
-python3 -m http.server 8000
-# → http://localhost:8000
-```
 
 ## 🗄️ Modelo de datos
 
