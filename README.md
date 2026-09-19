@@ -1,53 +1,53 @@
 <div align="center">
 
-# 🌱 GreenPitch.AI
+# 🌱 GreenPitch
 
-### Sistema inteligente de gestión del césped deportivo mediante análisis de datos e inteligencia artificial
+https://flavi13.github.io/Sener_website/#dashboard
+### Intelligent sports turf management system using data analytics and artificial intelligence
 
 [![Status](https://img.shields.io/badge/status-MVP-4ade80?style=flat-square)]()
 [![Stack](https://img.shields.io/badge/stack-IoT%20%C2%B7%20AI%20%C2%B7%20SaaS-1976D2?style=flat-square)]()
 [![License](https://img.shields.io/badge/license-MIT-lightgrey?style=flat-square)]()
 
-*Cada gota de agua, cada minuto de luz y cada acción de mantenimiento — guiados por datos reales del campo.*
+*Every drop of water, every minute of light, and every maintenance action — guided by real data from the field.*
 
 </div>
 
 ---
 
-## 🧠 ¿Qué es GreenPitch?
+## 🧠 What is GreenPitch?
 
-**GreenPitch** es una plataforma SaaS que cuida el césped de los campos de fútbol como lo haría el mejor greenkeeper del mundo, pero de forma automática y a escala. Combinamos sensores IoT distribuidos por el terreno de juego, datos meteorológicos en tiempo real y el calendario de actividades del campo (partidos, entrenamientos, eventos) para que un sistema de **IA predictiva** decida cuándo regar, cuánto iluminar, cuándo cortar y dónde fertilizar — zona por zona.
+**GreenPitch** is a SaaS platform that takes care of football pitches the way the best greenkeeper in the world would — but automatically and at scale. We combine IoT sensors distributed across the playing surface, real-time weather data, and the pitch's activity schedule (matches, training sessions, events) so that a **predictive AI** system decides when to water, how much to light, when to mow, and where to fertilize — zone by zone.
 
-El resultado: un césped siempre en estado óptimo, hasta un **35% menos de consumo de agua**, una reducción significativa de costes operativos y la tranquilidad de saber que el campo estará perfecto el día del partido, llueva o haga sol.
+The result: a pitch that's always in optimal condition, up to **35% lower water consumption**, a significant reduction in operating costs, and the peace of mind of knowing the field will be perfect on match day, rain or shine.
 
-## ⚡ ¿Por qué importa?
+## ⚡ Why it matters
 
-El mantenimiento de un campo de fútbol profesional supone **decenas de miles de litros de agua al día**, electricidad para iluminación artificial, productos químicos y horas de trabajo manual basado en intuición. Hoy esas decisiones se toman *a ojo*: se riega lo mismo en la banda izquierda que en el área pequeña, aunque una reciba el doble de sol o sufra el triple de pisadas. GreenPitch convierte ese cuidado artesanal en una operación **medible, optimizada y predictiva**.
+Maintaining a professional football pitch requires **tens of thousands of liters of water a day**, electricity for artificial lighting, chemical products, and hours of manual labor based on guesswork. Today those decisions are made *by eye*: the same amount of water is applied to the left flank as to the six-yard box, even though one gets twice the sunlight or three times the foot traffic. GreenPitch turns that artisanal care into a **measurable, optimized, and predictive** operation.
 
-## 🎯 Lo que hace, en una frase por bloque
+## 🎯 What it does, in one line per module
 
-| Bloque | Qué hace |
+| Module | What it does |
 |---|---|
-| 📡 **Sensores IoT** | Sondas de humedad, temperatura, luz, pH y salinidad envían lecturas cada minuto a la plataforma. |
-| 📊 **Dashboard en tiempo real** | KPIs por zona, mapa visual del campo y alertas instantáneas — todo refrescado en directo. |
-| 🤖 **IA predictiva** | Cruza sensores + meteo + actividades futuras para anticipar riego, iluminación y mantenimiento. |
-| 💧 **Riego por zonas** | Aplica solo donde hace falta, en la cantidad justa y en el momento óptimo. |
-| 📉 **Ahorro auditable** | Histórico completo de consumo y coste para demostrar el ROI mes a mes. |
-| 🚨 **Alertas inteligentes** | Avisos por umbral, fallo de sensor o batería baja — vía email, app y push. |
+| 📡 **IoT Sensors** | Probes for humidity, temperature, light, pH, and salinity send readings to the platform every minute. |
+| 📊 **Real-time dashboard** | Per-zone KPIs, a visual field map, and instant alerts — all refreshed live. |
+| 🤖 **Predictive AI** | Cross-references sensors + weather + upcoming activities to anticipate watering, lighting, and maintenance needs. |
+| 💧 **Zone-based irrigation** | Applies water only where it's needed, in the right amount, at the optimal time. |
+| 📉 **Auditable savings** | Full consumption and cost history to demonstrate ROI month over month. |
+| 🚨 **Smart alerts** | Threshold, sensor failure, or low battery notifications — via email, app, and push. |
 
-## 🏟️ Para quién
+## 🏟️ Who it's for
 
-Clubes profesionales, instalaciones municipales, ciudades deportivas, canteras y empresas de mantenimiento de césped deportivo que quieren dejar de gestionar sus campos por intuición y empezar a hacerlo con datos.
+Professional clubs, municipal facilities, sports cities, youth academies, and sports turf maintenance companies who want to stop managing their pitches by guesswork and start doing it with data.
 
+## 🗄️ Data model
 
-## 🗄️ Modelo de datos
-
-El esquema relacional completo (21 tablas, multi-tenant, con dominios para SaaS, IoT, meteo, actividades, IA y mantenimiento) está documentado en `docs/modelo_relacional_cesped_iot.pdf`.
+The complete relational schema (21 tables, multi-tenant, covering SaaS, IoT, weather, activities, AI, and maintenance domains) is documented in `docs/modelo_relacional_cesped_iot.pdf`.
 
 ---
 
 <div align="center">
 
-**Hecho con 💚 para los que cuidan el césped en el que se juega.**
+**Made with 💚 for those who take care of the pitch where the game is played.**
 
 </div>
